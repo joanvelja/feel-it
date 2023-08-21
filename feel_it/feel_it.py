@@ -15,6 +15,7 @@ class SentimentClassifier:
         self.model = AutoModelForSequenceClassification.from_pretrained("MilaNLProc/feel-it-italian-sentiment")
         self.model.eval()
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.model.to(self.device)
 
     def predict(self, sentences, batch_size=32):
         """
@@ -34,8 +35,8 @@ class SentimentClassifier:
         collect_outputs = []
         with torch.no_grad():
             for batch in loader:
-                input_ids = batch['input_ids']
-                attention_mask = batch['attention_mask']
+                input_ids = batch['input_ids'].to(self.device)
+                attention_mask = batch['attention_mask'].to(self.device)
 
                 outputs = self.model(input_ids, attention_mask=attention_mask)
                 collect_outputs.extend(torch.argmax(outputs["logits"], axis=1).cpu().numpy().tolist())
@@ -55,6 +56,8 @@ class EmotionClassifier:
         self.model = AutoModelForSequenceClassification.from_pretrained("MilaNLProc/feel-it-italian-emotion")
         self.model.eval()
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.model.to(self.device)
+
 
     def predict(self, sentences, batch_size=32):
         """
@@ -75,9 +78,9 @@ class EmotionClassifier:
 
         with torch.no_grad():
             for batch in loader:
-                input_ids = batch['input_ids']
-                attention_mask = batch['attention_mask']
-
+                input_ids = batch['input_ids'].to(self.device)
+                attention_mask = batch['attention_mask'].to(self.device)
+                
                 outputs = self.model(input_ids, attention_mask=attention_mask)
                 collect_outputs.extend(torch.argmax(outputs["logits"], axis=1).cpu().numpy().tolist())
 
